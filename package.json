@@ -1,0 +1,49 @@
+{
+  "name": "geodash-build-pipeline",
+  "version": "0.0.1",
+  "descriptin": "Low-level Javascript library for the [GeoDash](http://geodash.io) Gulp-based build pipeline.",
+  "keywords": [
+    "map",
+    "mapping",
+    "gis",
+    "gulp",
+    "geodash"
+  ],
+  "homepage": "http://geodash.io/",
+  "scripts": {
+    "build:docs": "mkdir docs; gulp docs",
+    "build": "npm run build:docs",
+    "jshint": "jshint src",
+    "tests": "npm run jshint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/geodashio/geodash-build-pipeline"
+  },
+  "license": "BSD-3-Clause",
+  "author": "GeoDash Developers",
+  "bugs": {
+    "url": "https://github.com/geodashio/geodash-build-pipeline/issues"
+  },
+  "dependencies": {
+    "merge": "*",
+    "gulp": "^3.9.0",
+    "gulp-util": "*",
+    "gulp-angular-templatecache": "^1.8.0",
+    "gulp-concat": "*",
+    "gulp-jshint": "*",
+    "gulp-less": "*",
+    "gulp-uglify": "*",
+    "gulp-rename": "*",
+    "path": "*",
+    "yamljs": "^0.2.7",
+    "expand-home-dir": "*",
+    "geodash-build-log": "*"
+  },
+  "devDependencies": {
+    "gulp": "*",
+    "gulp-jsdoc3": "^0.3.0",
+    "jshint": "*",
+    "uglify-js": "*"
+  }
+}
