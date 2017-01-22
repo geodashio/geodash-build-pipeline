@@ -14,10 +14,24 @@ var obj =
   "resource": function(project, name, version, minified, variables, projects_by_name)
   {
     var resourcePath = undefined;
+
+    if(name.indexOf(":") !== -1)
+    {
+      project = name.substring(0, name.indexOf(":"));
+      name = name.substring(name.indexOf(":")+1);
+    }
+
+    if(name.indexOf("@") !== -1)
+    {
+      version = name.substring(name.indexOf("@")+1);
+      name = name.substring(0, name.indexOf("@"));
+    }
+
     if(projects_by_name[project]['resources'] == undefined)
     {
       log.error("Missing project "+ project+" when trying to get resource "+name+".");
     }
+
     var project = projects_by_name[project];
     var resources = project['resources'];
     for(var i = 0; i < resources.length; i++)
@@ -28,10 +42,12 @@ var obj =
         break;
       }
     }
+
     if(version != undefined)
     {
       resourcePath = resourcePath.replace(new RegExp("{{(\\s*)version(\\s*)}}",'gi'), version);
     }
+
     try{
       resourcePath = obj.path(resourcePath, project.path.base)
     }catch(err){
