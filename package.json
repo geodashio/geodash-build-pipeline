@@ -1,6 +1,6 @@
 {
   "name": "geodash-build-pipeline",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "descriptin": "Low-level Javascript library for the [GeoDash](http://geodash.io) Gulp-based build pipeline.",
   "keywords": [
     "map",
