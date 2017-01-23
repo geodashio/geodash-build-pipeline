@@ -3,7 +3,9 @@
  * @namespace load
  */
 
+var execSync = require('child_process').execSync;
 var expandHomeDir = require('expand-home-dir');
+var path = require('path');
 var fs = require('fs');
 var gutil = require('gulp-util');
 var log = require("geodash-build-log");
@@ -76,6 +78,8 @@ var obj =
    * @function config
    * @param {(Object)} configPath - The path of the current config to load
    * @param {(string)} cwd - Current Working Directory
+   * @param {(string)} path_cache_projects - Path to directory for caching projects
+   * @param {(Object)} argv - Command line arguments
    * @return tree of configs
    * @memberof load
    *
@@ -83,11 +87,12 @@ var obj =
    * var geodash = require("geodash-build-pipeline");
    * var rootConfig = geodash.load.config("./config.yml", "/home/vagrant/geodash-viewer.git");
    */
-  "config": function(configPath, cwd)
+  "config": function(configPath, cwd, path_cache_projects, argv)
   {
-    var children = [];
-
     var configObject = obj.yaml(configPath, cwd);
+
+    var children = [];
+    var projects = undefined;
 
     if("dependencies" in configObject)
     {
@@ -95,12 +100,56 @@ var obj =
       {
         if("project" in configObject["dependencies"]["production"])
         {
-          var projects = configObject["dependencies"]["production"]["project"];
-          for (var i = 0; i < projects.length; i++)
+          projects = configObject["dependencies"]["production"]["project"];
+        }
+      }
+    }
+
+    if(projects != undefined)
+    {
+      for(var i = 0; i < projects.length; i++)
+      {
+        var project = projects[i];
+        var basepath = undefined;
+        //###
+        if(typeof project != "string")
+        {
+          var uri = project.uri || project.url;
+          if(uri.startsWith("https://") && uri.endsWith(".git"))
           {
-            var project = projects[i];
-            children.push(obj.config(project, cwd));
+            var branch = project.branch || project.version || "master";
+            var targetFolder = expandHomeDir(resolve.path(path.join(path_cache_projects, path.basename(uri.slice(7)))));
+
+            // 1: Attempt `git clone uri ...`
+            var cmd = ["git", "clone", "'"+uri+"'", "'"+path.basename(targetFolder)+"'"].join(" ");
+            try { execSync(cmd, {'cwd': path.dirname(targetFolder), 'stdio': 'ignore'}); }
+            catch(err) { log.debug(['Error on', cmd], argv); }
+
+            // 2: Attempt `git checkout branch ...`
+            cmd = ["git", "checkout", branch].join(" ");
+            try { execSync(cmd, {'cwd': targetFolder, 'stdio': 'ignore'}); }
+            catch(err) { log.debug(['Error on', cmd], argv); }
+
+            // 3: Attempt `git pull origin branch ...`
+            cmd = ["git", "pull", 'origin', branch].join(" ");
+            try { execSync(cmd, {'cwd': targetFolder, 'stdio': 'ignore'}); }
+            catch(err) { log.debug(['Error on', cmd], argv); }
+
+            // 4: Update Basepath
+            basepath = expandHomeDir(resolve.path(
+              path.join(path_cache_projects, path.basename(uri.slice(7)), "config.yml"),
+              cwd
+            ));
           }
+        }
+        else
+        {
+          basepath = project;
+        }
+        //###
+        if(basepath != undefined)
+        {
+          children.push(obj.config(basepath, cwd));
         }
       }
     }

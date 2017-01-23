@@ -27,7 +27,7 @@ var obj =
       name = name.substring(0, name.indexOf("@"));
     }
 
-    if(projects_by_name[project]['resources'] == undefined)
+    if(projects_by_name[project] == undefined)
     {
       log.error("Missing project "+ project+" when trying to get resource "+name+".");
     }
@@ -57,7 +57,6 @@ var obj =
   },
   "source": function(rootConfig, x, variables, projects_by_name)
   {
-    log.debug(["\n","resolve("+JSON.stringify(x.name)+")"]);
     x = merge(true, x);
     if(Array.isArray(x.src))
     {
