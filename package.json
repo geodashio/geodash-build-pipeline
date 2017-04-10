@@ -1,6 +1,6 @@
 {
   "name": "geodash-build-pipeline",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "descriptin": "Low-level Javascript library for the [GeoDash](http://geodash.io) Gulp-based build pipeline.",
   "keywords": [
     "map",
@@ -35,10 +35,17 @@
     "gulp-less": "*",
     "gulp-uglify": "*",
     "gulp-rename": "*",
+    "gulp-tslint": "^3.6.0",
+    "gulp-replace": "*",
+    "gulp-s3-upload": "*",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-typescript": "~3.1.6",
     "path": "*",
     "yamljs": "^0.2.7",
     "expand-home-dir": "*",
-    "geodash-build-log": "*"
+    "geodash-build-log": "*",
+    "mkdirp": "^0.5.1",
+    "typescript": "~2.1.0"
   },
   "devDependencies": {
     "gulp": "*",

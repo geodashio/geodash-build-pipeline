@@ -3,15 +3,18 @@
  * @namespace resolve
  */
 
+var path = require('path');
 var merge = require('merge');
 var expandHomeDir = require('expand-home-dir');
 var log = require("geodash-build-log");
+var mkdirp = require("mkdirp");
+var execSync = require('child_process').execSync;
 
 var obj =
 {
-  "build": require("./build"),
-  "path": require("./path"),
-  "resource": function(project, name, version, minified, variables, projects_by_name)
+  build: require("./build"),
+  path: require("./path"),
+  resource: function(project, name, version, minified, variables, projects_by_name)
   {
     var resourcePath = undefined;
 
@@ -55,7 +58,7 @@ var obj =
     };
     return resourcePath;
   },
-  "source": function(rootConfig, x, variables, projects_by_name)
+  source: function(rootConfig, x, variables, projects_by_name)
   {
     x = merge(true, x);
     if(Array.isArray(x.src))
@@ -119,6 +122,84 @@ var obj =
     }
     x.dest = obj.path(x.dest);
     return x;
+  },
+  plugin: function(pluginName, options)
+  {
+    var argv = options["argv"];
+    var cwd = options["cwd"] || ".";
+    var path_cache = options["path_cache"];
+    var path_plugins = options["path_plugins"];
+
+    if(typeof pluginName != "string")
+    {
+      var uri = pluginName.uri || pluginName.url;
+      log.debug('Plugin: '+uri, argv);
+      if(uri.startsWith("file://"))
+      {
+        pluginPath = obj.path(path.join(uri.slice(6), "config.yml"), cwd);
+      }
+      else if(uri.startsWith("https://") && uri.endsWith(".git"))
+      {
+        var branch = pluginName.branch || pluginName.version || "master";
+        var targetFolder = obj.path(path.join(path_cache, "plugins", path.basename(uri.slice(7))));
+        mkdirp.sync(path.dirname(obj.path(targetFolder, cwd)));
+        //
+        var cmd = ["git", "clone", "'"+uri+"'", "'"+path.basename(targetFolder)+"'"].join(" ");
+        //execSync(cmd, {'cwd': path.dirname(targetFolder)});
+        try { execSync(cmd, {'cwd': path.dirname(targetFolder), 'stdio': 'ignore'}); }
+        catch(err) { log.debug(['Error on', cmd], argv); }
+        var cmd = ["git", "checkout", branch].join(" ");
+        try { execSync(cmd, {'cwd': targetFolder, 'stdio': 'ignore'}); }
+        catch(err) { log.debug(['Error on', cmd], argv); }
+        var cmd = ["git", "pull", 'origin', branch].join(" ");
+        try { execSync(cmd, {'cwd': targetFolder, 'stdio': 'ignore'}); }
+        catch(err) { log.debug(['Error on', cmd], argv); }
+        pluginPath = obj.path(
+          path.join(path_cache, "plugins", path.basename(uri.slice(7)), "config.yml"),
+          cwd
+        );
+      }
+      else
+      {
+        pluginPath = obj.path(path.join("plugins", uri, "config.yml"), cwd);
+      }
+    }
+    else
+    {
+      log.debug('Plugin: '+pluginName, argv);
+      var uri = pluginName;
+      if(pluginName.startsWith("file://"))
+      {
+        pluginPath = obj.path(path.join(uri.slice(6), "config.yml"), cwd);
+      }
+      else if(pluginName.startsWith("https://") && pluginName.endsWith(".git"))
+      {
+        var branch = "master";
+        var targetFolder = obj.path(path.join(path_cache, "plugins", path.basename(uri.slice(7))));
+        mkdirp.sync(path.dirname(obj.path(targetFolder, cwd)));
+        //
+        var cmd = ["git", "clone", "'"+uri+"'", "'"+path.basename(targetFolder)+"'"].join(" ");
+        //execSync(cmd, {'cwd': path.dirname(targetFolder)});
+        try { execSync(cmd, {'cwd': path.dirname(targetFolder), 'stdio': 'ignore'}); }
+        catch(err) { log.debug(['Error on', cmd], argv); }
+        var cmd = ["git", "checkout", branch].join(" ");
+        try { execSync(cmd, {'cwd': targetFolder, 'stdio': 'ignore'}); }
+        catch(err) { log.debug(['Error on', cmd], argv); }
+        var cmd = ["git", "pull", 'origin', branch].join(" ");
+        try { execSync(cmd, {'cwd': targetFolder, 'stdio': 'ignore'}); }
+        catch(err) { log.debug(['Error on', cmd], argv); }
+        pluginPath = obj.path(
+          path.join(path_cache, "plugins", path.basename(uri.slice(7)), "config.yml"),
+          cwd
+        );
+      }
+      else
+      {
+        pluginPath = obj.path(path.join(path_plugins, uri, "config.yml"), cwd);
+      }
+    }
+
+    return pluginPath;
   }
 };
 
