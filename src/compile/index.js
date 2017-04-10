@@ -7,6 +7,7 @@ module.exports =
 {
   "css": require("./css"),
   "js": require("./js"),
+  "ts": require("./ts"),
   "less": require("./less"),
   "templates": require("./templates")
 };

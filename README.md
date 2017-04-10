@@ -20,7 +20,7 @@ npm install geodash-build-pipeline --save-dev
 
 # Usage
 
-This library should be used in a `gulpfile` when building a GeoDash platform.  It is not developed for the GeoDash `runtime` environment in the browser, as such the package is prefixed with `geodash-build-`.  To load into a gulpfile, add the following:
+This library should be used in a `gulpfile` when building a GeoDash application.  It is not developed for the GeoDash `runtime` environment in the browser, as such the package is prefixed with `geodash-build-`.  To load into a gulpfile, add the following:
 
 ```
 var geodash = require("geodash-build-pipeline");
@@ -33,7 +33,7 @@ geodash.resolve.path(...)
 geodash.log.error(...)
 ```
 
-Build the docs for the full API.  For an example see the GeoDash Viewer [gulpfile.js](https://github.com/geodashio/geodash-viewer/blob/master/gulpfile.js).
+Build the docs for the full API.  For an example see the GeoDash Viewer [gulpfile.js](https://github.com/geodashio/geodash-viewer-angular/blob/master/gulpfile.js).
 
 # Building
 
